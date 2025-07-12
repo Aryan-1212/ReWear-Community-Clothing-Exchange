@@ -1,5 +1,6 @@
 'use client'
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const categories = [
   'Men', 'Women', 'Kids', 'Accessories', 'Shoes', 'Bags'
@@ -8,6 +9,35 @@ const categories = [
 const products = [1, 2, 3, 4];
 
 const LandingPage = () => {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/auth/me', {
+      credentials: 'include',
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          router.replace('/login');
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        router.replace('/login');
+      });
+  }, [router]);
+
+  const handleLogout = async () => {
+    await fetch('http://localhost:5000/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    });
+    router.push('/login');
+  };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-white">Loading...</div>;
+
   return (
     <div className="min-h-screen bg-black text-gray-100">
       {/* Top Bar */}
@@ -29,6 +59,7 @@ const LandingPage = () => {
         </nav>
         <div className="flex items-center gap-4 w-full md:w-auto justify-end">
           <button className="bg-blue-900 text-white px-4 py-2 rounded-lg font-bold hover:bg-black border border-blue-900 transition w-full md:w-auto">Profile</button>
+          <button onClick={handleLogout} className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-black border border-red-600 transition w-full md:w-auto ml-2">Logout</button>
         </div>
       </header>
 

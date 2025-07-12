@@ -3,6 +3,7 @@ import React from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import Link from 'next/link';
 
 const featuredItems = [
   { id: 1, name: 'Denim Jacket', img: '', desc: 'Trendy and sustainable.' },
@@ -58,8 +59,8 @@ const HeroSectionPage = () => {
         <nav className="flex gap-6 text-lg font-semibold w-full md:w-auto justify-center md:justify-end">
           <a href="#" className="hover:text-blue-400">Home</a>
           <a href="#" className="hover:text-blue-400">Browse</a>
-          <a href="#" className="hover:text-blue-400">Login</a>
-          <a href="#" className="hover:text-blue-400">Sign Up</a>
+          <Link href="/login" className="hover:text-blue-400">Login</Link>
+          <Link href="/signup" className="hover:text-blue-400">Sign Up</Link>
         </nav>
       </header>
 

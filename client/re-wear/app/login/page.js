@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 const LoginPage = () => {
@@ -8,6 +8,19 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
+
+  useEffect(() => {
+    // Check if already logged in
+    fetch('http://localhost:5000/auth/me', {
+      credentials: 'include',
+    })
+      .then(async (res) => {
+        if (res.ok) {
+          router.replace('/landingpage');
+        }
+      })
+      .catch(() => {});
+  }, [router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +32,7 @@ const LoginPage = () => {
       body: JSON.stringify({ email, password })
     });
     if (res.ok) {
-      router.push('/dashboard');
+      router.push('/landingpage');
     } else {
       const data = await res.json();
       setError(data.message || 'Login failed');
