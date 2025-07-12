@@ -47,24 +47,6 @@ const carouselSettings = {
 const HeroSectionPage = () => {
   return (
     <div className="min-h-screen bg-black text-gray-100 flex flex-col">
-      {/* Header */}
-      <header className="flex flex-col md:flex-row items-center justify-between px-4 md:px-8 py-4 border-b border-gray-800 gap-4 md:gap-0">
-        <div className="flex items-center gap-3 w-full md:w-auto justify-between">
-          <div className="flex items-center gap-3">
-            <span className="inline-block bg-gray-800 rounded-full p-2">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" fill="#fff" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 1.343-3 3 0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.657-1.343-3-3-3zm0 0V4m0 8v8m0 0H8m4 0h4" /></svg>
-            </span>
-            <span className="text-2xl font-extrabold text-white">ReWear</span>
-          </div>
-        </div>
-        <nav className="flex gap-6 text-lg font-semibold w-full md:w-auto justify-center md:justify-end">
-          <Link href="/" className="hover:text-blue-400">Home</Link>
-          <Link href="/itemlisting" className="hover:text-blue-400">Browse</Link>
-          <Link href="/login" className="hover:text-blue-400">Login</Link>
-          <Link href="/signup" className="hover:text-blue-400">Sign Up</Link>
-        </nav>
-      </header>
-
       {/* Hero Section */}
       <section className="flex flex-col items-center justify-center text-center py-12 px-4 md:px-8">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-4">Swap. Save. Sustain.</h1>
