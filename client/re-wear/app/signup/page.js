@@ -1,6 +1,36 @@
-import React from 'react';
+"use client"
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const SignupPage = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    const res = await fetch('http://localhost:5000/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ name, email, password })
+    });
+    if (res.ok) {
+      router.push('/dashboard');
+    } else {
+      const data = await res.json();
+      setError(data.message || 'Signup failed');
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-black mt-20 mb-10">
       <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl flex overflow-hidden">
@@ -8,27 +38,28 @@ const SignupPage = () => {
         <div className="w-full md:w-1/2 p-10 flex flex-col justify-center">
           <h2 className="text-4xl font-extrabold mb-2 text-center text-gray-900 tracking-tight">Join ReWear</h2>
           <p className="text-gray-600 mb-8 text-center text-lg font-medium">Create your account and start exchanging fashion sustainably</p>
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label className="block text-base font-semibold mb-1 text-gray-800">Full Name</label>
-              <input type="text" placeholder="Enter your full name" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 bg-gray-50 text-gray-900 font-medium" />
+              <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Enter your full name" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 bg-gray-50 text-gray-900 font-medium" />
             </div>
             <div>
               <label className="block text-base font-semibold mb-1 text-gray-800">Email Address</label>
-              <input type="email" placeholder="Enter your email" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 bg-gray-50 text-gray-900 font-medium" />
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Enter your email" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 bg-gray-50 text-gray-900 font-medium" />
             </div>
             <div>
               <label className="block text-base font-semibold mb-1 text-gray-800">Password</label>
-              <input type="password" placeholder="Create a password" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 bg-gray-50 text-gray-900 font-medium" />
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Create a password" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 bg-gray-50 text-gray-900 font-medium" />
             </div>
             <div>
               <label className="block text-base font-semibold mb-1 text-gray-800">Confirm Password</label>
-              <input type="password" placeholder="Confirm your password" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 bg-gray-50 text-gray-900 font-medium" />
+              <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm your password" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 bg-gray-50 text-gray-900 font-medium" />
             </div>
             <div className="flex items-center mb-2">
               <input type="checkbox" id="terms" className="mr-2 accent-blue-700" />
               <label htmlFor="terms" className="text-sm text-gray-700">I agree to the <a href="#" className="text-blue-700 underline font-semibold">Terms of Service</a> and <a href="#" className="text-blue-700 underline font-semibold">Privacy Policy</a></label>
             </div>
+            {error && <div className="text-red-600 text-sm font-semibold">{error}</div>}
             <button type="submit" className="w-full py-3 bg-blue-900 text-white font-bold rounded-lg shadow-md hover:bg-black transition text-lg tracking-wide">Create Account</button>
             <div className="flex items-center my-4">
               <div className="flex-grow h-px bg-gray-200" />
@@ -41,7 +72,7 @@ const SignupPage = () => {
             </button>
           </form>
           <div className="mt-6 text-center text-sm text-gray-600 font-medium">
-            Already have an account? <a href="#" className="text-blue-700 font-bold hover:underline">Sign in</a>
+            Already have an account? <a href="/login" className="text-blue-700 font-bold hover:underline">Sign in</a>
           </div>
         </div>
         {/* Right: Branding & Features */}

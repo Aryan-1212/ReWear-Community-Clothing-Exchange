@@ -4,8 +4,8 @@ import LoginPage from './login/page'
 
 const page = () => {
   return (
-    // <SignupPage />
-    <LoginPage />
+    <SignupPage />
+    // <LoginPage />
   )
 }
 
