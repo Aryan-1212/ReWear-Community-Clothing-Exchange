@@ -28,8 +28,10 @@ app.use(cors({
   credentials: true
 }));
 app.use('/auth', require('./routes/auth'));
+app.use('/api/user', require('./routes/user'));
 app.use('/api/items', require('./routes/items'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/swap-requests', require('./routes/swapRequests'));
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
