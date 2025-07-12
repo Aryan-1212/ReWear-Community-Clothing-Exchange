@@ -28,12 +28,14 @@ const AddItemPage = () => {
   }, [user, router]);
 
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    setImages(files);
-    
-    // Create preview URLs
-    const urls = files.map(file => URL.createObjectURL(file));
-    setPreviewUrls(urls);
+    const file = e.target.files[0];
+    if (file) {
+      setImages([file]);
+      
+      // Create preview URL
+      const url = URL.createObjectURL(file);
+      setPreviewUrls([url]);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -51,12 +53,20 @@ const AddItemPage = () => {
 
     try {
       const formDataToSend = new FormData();
-      images.forEach(image => {
-        formDataToSend.append('images', image);
-      });
       
+      // Add the first image as 'image' (backend expects single image)
+      if (images.length > 0) {
+        formDataToSend.append('image', images[0]);
+      }
+      
+      // Add other form data
       Object.keys(formData).forEach(key => {
-        formDataToSend.append(key, formData[key]);
+        if (key === 'points') {
+          // Convert 'points' to 'price' for backend
+          formDataToSend.append('price', formData[key]);
+        } else {
+          formDataToSend.append(key, formData[key]);
+        }
       });
 
       await api.post('/api/items', formDataToSend, {
@@ -91,11 +101,10 @@ const AddItemPage = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Image Upload */}
             <div>
-              <label className="block text-lg font-semibold mb-2">Upload Images</label>
+              <label className="block text-lg font-semibold mb-2">Upload Image</label>
               <input
                 type="file"
                 accept="image/*"
-                multiple
                 onChange={handleImageChange}
                 className="hidden"
                 id="image-upload"
@@ -110,24 +119,22 @@ const AddItemPage = () => {
                     <path d="M28 32H20v-4h8v4zm8-24v36H12V8h24z" />
                   </svg>
                   <span className="mt-2 block text-sm text-gray-400">
-                    Click to upload images
+                    Click to upload image
                   </span>
                 </div>
               </label>
               
-              {/* Image Previews */}
+              {/* Image Preview */}
               {previewUrls.length > 0 && (
-                <div className="mt-4 grid grid-cols-3 gap-4">
-                  {previewUrls.map((url, index) => (
-                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={url}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
+                <div className="mt-4">
+                  <div className="relative aspect-square w-32 h-32 rounded-lg overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={previewUrls[0]}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 </div>
               )}
             </div>

@@ -69,7 +69,8 @@ exports.getApprovedItems = async (req, res) => {
       sortOrder = 'desc'
     } = req.query;
     
-    const filter = { status: 'approved' };
+    // Temporarily show all items, not just approved ones
+    const filter = {}; // Changed from { status: 'approved' }
     if (category) filter.category = category;
     if (size) filter.size = size;
     if (condition) filter.condition = condition;
@@ -97,9 +98,9 @@ exports.getApprovedItems = async (req, res) => {
 
     const total = await Item.countDocuments(filter);
 
-    const categories = await Item.distinct('category', { status: 'approved' });
-    const sizes = await Item.distinct('size', { status: 'approved' });
-    const conditions = await Item.distinct('condition', { status: 'approved' });
+    const categories = await Item.distinct('category', filter);
+    const sizes = await Item.distinct('size', filter);
+    const conditions = await Item.distinct('condition', filter);
 
     res.json({
       items,
@@ -124,7 +125,8 @@ exports.getApprovedItems = async (req, res) => {
 
 exports.getApprovedItemById = async (req, res) => {
   try {
-    const item = await Item.findOne({ _id: req.params.id, status: 'approved' })
+    // Temporarily show all items, not just approved ones
+    const item = await Item.findById(req.params.id)
       .populate('uploader', 'name email profilePicture points');
     
     if (!item) return res.status(404).json({ message: 'Item not found' });
