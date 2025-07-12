@@ -38,7 +38,7 @@ const UserDashboardPage = () => {
         api.get('/api/swap-requests/sent')
       ]);
       setUserItems(itemsRes.data.items || []);
-      setSwapRequests(requestsRes.data || []);
+      setSwapRequests(requestsRes.data.swapRequests || []);
       setFetchError(null);
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -144,22 +144,6 @@ const UserDashboardPage = () => {
           </div>
         </div>
       )}
-      {/* Header */}
-      <header className="flex flex-col md:flex-row items-center justify-between px-4 md:px-8 py-4 border-b border-gray-800 gap-4 md:gap-0">
-        <div className="flex items-center gap-3 w-full md:w-auto justify-between">
-          <div className="flex items-center gap-3">
-            <span className="inline-block bg-gray-800 rounded-full p-2">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" fill="#fff" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 1.343-3 3 0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.657-1.343-3-3-3zm0 0V4m0 8v8m0 0H8m4 0h4" /></svg>
-            </span>
-            <span className="text-2xl font-extrabold text-white">ReWear</span>
-          </div>
-        </div>
-        <nav className="flex gap-6 text-lg font-semibold w-full md:w-auto justify-center md:justify-end">
-          <a href="/itemlisting" className="hover:text-blue-400">Browse</a>
-          <a href="/userdashboard" className="hover:text-blue-400">Dashboard</a>
-          <button onClick={handleLogout} className="hover:text-blue-400">Logout</button>
-        </nav>
-      </header>
 
       {/* Main Dashboard Section */}
       <main className="px-4 md:px-8 py-8 max-w-6xl mx-auto">

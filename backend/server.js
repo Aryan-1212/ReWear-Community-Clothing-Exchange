@@ -26,6 +26,15 @@ app.use('/api/items', require('./routes/items'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/swap-requests', require('./routes/swapRequests'));
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'ReWear backend is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
