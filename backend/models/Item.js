@@ -7,6 +7,8 @@ const itemSchema = new mongoose.Schema({
   category: { type: String },
   size: { type: String },
   condition: { type: String },
+  brand: { type: String },
+  color: { type: String },
   tags: [{ type: String }],
   pointsRequired: { type: Number, default: 10 },
   status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },

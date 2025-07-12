@@ -33,8 +33,6 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.log('Auth check failed:', error.message);
       setUser(null);
-      // Clear any invalid token from localStorage
-      localStorage.removeItem('token');
     } finally {
       setLoading(false);
       setChecked(true);
@@ -74,7 +72,6 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       setUser(null);
-      localStorage.removeItem('token');
     }
   };
 

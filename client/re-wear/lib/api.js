@@ -10,12 +10,10 @@ const api = axios.create({
   },
 });
 
+// Remove token from localStorage since we're using cookies
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // Cookies are automatically sent with requests when withCredentials is true
     return config;
   },
   (error) => {
@@ -28,7 +26,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
       const currentPath = window.location.pathname;
       if (!PUBLIC_ROUTES.includes(currentPath)) {
         window.location.href = '/login';

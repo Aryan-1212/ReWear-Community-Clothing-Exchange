@@ -4,12 +4,12 @@ const { isAuthenticated } = require('../middleware/auth');
 const itemsController = require('../controllers/itemsController');
 const upload = require('../middleware/upload');
 
-router.post('/', isAuthenticated, upload.array('images', 5), itemsController.createItem);
+router.post('/', isAuthenticated, upload.single('image'), itemsController.createItem);
 router.get('/', itemsController.getApprovedItems);
 router.get('/categories', itemsController.getCategories);
 router.get('/stats', itemsController.getItemStats);
 router.get('/:id', itemsController.getApprovedItemById);
-router.put('/:id', isAuthenticated, upload.array('images', 5), itemsController.updateItem);
+router.put('/:id', isAuthenticated, upload.single('image'), itemsController.updateItem);
 router.delete('/:id', isAuthenticated, itemsController.deleteItem);
 router.get('/user/items', isAuthenticated, itemsController.getUserItems);
 

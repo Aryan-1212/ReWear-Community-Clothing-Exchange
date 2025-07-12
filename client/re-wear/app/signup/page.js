@@ -14,6 +14,7 @@ const SignupPage = () => {
   const { signup, user } = useAuth();
 
   useEffect(() => {
+    // Only redirect if user is already logged in
     if (user) {
       router.replace('/userdashboard');
     }

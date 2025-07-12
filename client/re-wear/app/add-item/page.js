@@ -5,9 +5,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import api from '../../lib/api';
 
 const AddItemPage = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     title: '',
@@ -43,7 +43,7 @@ const AddItemPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setFormLoading(true);
     setError('');
 
     try {
@@ -71,13 +71,21 @@ const AddItemPage = () => {
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to add item');
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
 
-  if (!user) {
+  if (!user && !loading) {
     router.push('/login');
     return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
   }
 
   return (
@@ -230,10 +238,10 @@ const AddItemPage = () => {
             <div className="flex gap-4">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={formLoading}
                 className="px-8 py-3 bg-blue-900 text-white font-bold rounded-lg hover:bg-black transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Adding Item...' : 'Add Item'}
+                {formLoading ? 'Adding Item...' : 'Add Item'}
               </button>
               <button
                 type="button"

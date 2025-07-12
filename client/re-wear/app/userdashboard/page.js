@@ -12,6 +12,7 @@ const UserDashboardPage = () => {
   const [loading, setLoading] = useState(false);
   const [userItems, setUserItems] = useState([]);
   const [swapRequests, setSwapRequests] = useState([]);
+  const [fetchError, setFetchError] = useState(null);
   const [editForm, setEditForm] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -33,14 +34,15 @@ const UserDashboardPage = () => {
   const fetchUserData = async () => {
     try {
       const [itemsRes, requestsRes] = await Promise.all([
-        api.get('/api/items/my-items'),
-        api.get('/api/swap-requests/my-requests')
+        api.get('/api/items/user/items'),
+        api.get('/api/swap-requests/sent')
       ]);
-      
-      setUserItems(itemsRes.data);
-      setSwapRequests(requestsRes.data);
+      setUserItems(itemsRes.data.items || []);
+      setSwapRequests(requestsRes.data || []);
+      setFetchError(null);
     } catch (error) {
       console.error('Error fetching user data:', error);
+      setFetchError(error?.response?.data?.message || error.message || 'An error occurred while fetching your data.');
     }
   };
 
@@ -66,6 +68,13 @@ const UserDashboardPage = () => {
     return (
       <div className="min-h-screen bg-black text-gray-100 flex items-center justify-center">
         <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+  if (fetchError) {
+    return (
+      <div className="min-h-screen bg-black text-red-500 flex items-center justify-center">
+        <div className="text-xl">{fetchError}</div>
       </div>
     );
   }

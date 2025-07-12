@@ -1,10 +1,10 @@
 const Item = require('../models/Item');
 const User = require('../models/User');
-const { uploadMultipleToCloudinary, deleteFromCloudinary } = require('../utils/cloudinaryUpload');
+const { uploadToCloudinary, uploadMultipleToCloudinary, deleteFromCloudinary } = require('../utils/cloudinaryUpload');
 
 exports.createItem = async (req, res) => {
   try {
-    const { title, description, category, size, condition, tags, pointsRequired } = req.body;
+    const { title, description, category, size, condition, brand, color, price } = req.body;
     
     if (!title || !category) {
       return res.status(400).json({ 
@@ -12,14 +12,14 @@ exports.createItem = async (req, res) => {
       });
     }
 
-    let imageUrls = [];
-    if (req.files && req.files.length > 0) {
+    let imageUrl = '';
+    if (req.file) {
       try {
-        const imageBuffers = req.files.map(file => file.buffer);
-        imageUrls = await uploadMultipleToCloudinary(imageBuffers, 'rewear/items');
+        const imageBuffer = req.file.buffer;
+        imageUrl = await uploadToCloudinary(imageBuffer, 'rewear/items');
       } catch (uploadError) {
         return res.status(400).json({ 
-          message: 'Failed to upload images',
+          message: 'Failed to upload image',
           error: uploadError.message 
         });
       }
@@ -28,12 +28,13 @@ exports.createItem = async (req, res) => {
     const item = await Item.create({
       title,
       description,
-      images: imageUrls,
+      images: imageUrl ? [imageUrl] : [],
       category,
       size,
       condition,
-      tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
-      pointsRequired: pointsRequired || 10,
+      brand,
+      color,
+      pointsRequired: price ? parseInt(price) : 10,
       uploader: req.user._id,
       status: 'pending'
     });

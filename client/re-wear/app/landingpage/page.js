@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../contexts/AuthContext';
+// import { useAuth } from '../../contexts/AuthContext';
 
 const categories = [
   'Men', 'Women', 'Kids', 'Accessories', 'Shoes', 'Bags'
@@ -11,25 +11,8 @@ const products = [1, 2, 3, 4];
 
 const LandingPage = () => {
   const router = useRouter();
-  const { user, loading, logout } = useAuth();
-  const [pageLoading, setPageLoading] = useState(true);
-
-  useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.replace('/login');
-      } else {
-        setPageLoading(false);
-      }
-    }
-  }, [user, loading, router]);
-
-  const handleLogout = async () => {
-    await logout();
-    router.push('/login');
-  };
-
-  if (loading || pageLoading) return <div className="min-h-screen flex items-center justify-center text-white">Loading...</div>;
+  // Public page: no auth check or redirect
+  // Remove handleLogout and loading logic
 
   return (
     <div className="min-h-screen bg-black text-gray-100">
