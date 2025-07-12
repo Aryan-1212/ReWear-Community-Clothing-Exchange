@@ -12,9 +12,16 @@ const UserDashboardPage = () => {
   const [loading, setLoading] = useState(false);
   const [userItems, setUserItems] = useState([]);
   const [swapRequests, setSwapRequests] = useState([]);
+  const [receivedRequests, setReceivedRequests] = useState([]);
   const [fetchError, setFetchError] = useState(null);
+  const [notificationsData, setNotificationsData] = useState({
+    approved: [],
+    pending: [],
+    recent: []
+  });
   const [editForm, setEditForm] = useState({
     name: user?.name || '',
+    age: user?.age || '',
     email: user?.email || '',
     phone: user?.phone || '',
     city: user?.city || '',
@@ -28,17 +35,27 @@ const UserDashboardPage = () => {
     
     if (user) {
       fetchUserData();
+      // Update edit form with user data
+      setEditForm({
+        name: user.name || '',
+        age: user.age || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        city: user.city || '',
+      });
     }
   }, [user, loading, router]);
 
   const fetchUserData = async () => {
     try {
-      const [itemsRes, requestsRes] = await Promise.all([
+      const [itemsRes, sentRequestsRes, receivedRequestsRes] = await Promise.all([
         api.get('/api/items/user/items'),
-        api.get('/api/swap-requests/sent')
+        api.get('/api/swap-requests/sent'),
+        api.get('/api/swap-requests/received')
       ]);
       setUserItems(itemsRes.data.items || []);
-      setSwapRequests(requestsRes.data.swapRequests || []);
+      setSwapRequests(sentRequestsRes.data.swapRequests || []);
+      setReceivedRequests(receivedRequestsRes.data.swapRequests || []);
       setFetchError(null);
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -62,6 +79,39 @@ const UserDashboardPage = () => {
   const handleLogout = async () => {
     await logout();
     router.push('/login');
+  };
+
+  const handleAcceptRequest = async (requestId) => {
+    try {
+      await api.put(`/api/swap-requests/${requestId}/accept`);
+      alert('Swap request accepted successfully!');
+      fetchUserData(); // Refresh data
+    } catch (error) {
+      console.error('Error accepting request:', error);
+      alert(error.response?.data?.message || 'Failed to accept request');
+    }
+  };
+
+  const handleRejectRequest = async (requestId) => {
+    try {
+      await api.put(`/api/swap-requests/${requestId}/reject`);
+      alert('Swap request rejected successfully!');
+      fetchUserData(); // Refresh data
+    } catch (error) {
+      console.error('Error rejecting request:', error);
+      alert(error.response?.data?.message || 'Failed to reject request');
+    }
+  };
+
+  const handleCancelRequest = async (requestId) => {
+    try {
+      await api.delete(`/api/swap-requests/${requestId}`);
+      alert('Swap request cancelled successfully!');
+      fetchUserData(); // Refresh data
+    } catch (error) {
+      console.error('Error cancelling request:', error);
+      alert(error.response?.data?.message || 'Failed to cancel request');
+    }
   };
 
   if (loading) {
@@ -193,22 +243,80 @@ const UserDashboardPage = () => {
           </div>
         </div>
 
-        {/* Swap Requests */}
+        {/* Sent Swap Requests */}
         <div className="mt-10">
-          <h2 className="text-lg font-bold text-white mb-4">My Swap Requests</h2>
+          <h2 className="text-lg font-bold text-white mb-4">My Sent Swap Requests</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {swapRequests.length > 0 ? (
               swapRequests.map((request, idx) => (
                 <div key={request._id || idx} className="bg-white rounded-xl border border-gray-200 p-4 text-black">
-                  <div className="font-semibold">{request.status}</div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    {request.requestedItem?.title} ↔ {request.offeredItem?.title}
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="font-semibold capitalize">{request.status}</div>
+                    {request.status === 'pending' && (
+                      <button
+                        onClick={() => handleCancelRequest(request._id)}
+                        className="text-red-600 text-sm hover:text-red-800"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-600 mb-2">
+                    {request.item?.title || 'Item'}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Requested from: {request.owner?.name || 'Unknown'}
                   </div>
                 </div>
               ))
             ) : (
               <div className="col-span-full text-center text-gray-400 py-8">
-                No swap requests yet.
+                No sent swap requests yet.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Received Swap Requests */}
+        <div className="mt-10">
+          <h2 className="text-lg font-bold text-white mb-4">Received Swap Requests</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {receivedRequests.length > 0 ? (
+              receivedRequests.map((request, idx) => (
+                <div key={request._id || idx} className="bg-white rounded-xl border border-gray-200 p-4 text-black">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="font-semibold capitalize">{request.status}</div>
+                    {request.status === 'pending' && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleAcceptRequest(request._id)}
+                          className="text-green-600 text-sm hover:text-green-800"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() => handleRejectRequest(request._id)}
+                          className="text-red-600 text-sm hover:text-red-800"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-600 mb-2">
+                    {request.item?.title || 'Item'}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Requested by: {request.requester?.name || 'Unknown'}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Points required: {request.item?.pointsRequired || 0}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center text-gray-400 py-8">
+                No received swap requests yet.
               </div>
             )}
           </div>

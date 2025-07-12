@@ -15,9 +15,10 @@ exports.createSwapRequest = async (req, res) => {
       return res.status(404).json({ message: 'Item not found' });
     }
 
-    if (item.status !== 'approved') {
-      return res.status(400).json({ message: 'Item is not available for swapping' });
-    }
+    // Temporarily allow swapping of all items, not just approved ones
+    // if (item.status !== 'approved') {
+    //   return res.status(400).json({ message: 'Item is not available for swapping' });
+    // }
 
     if (item.uploader.toString() === req.user._id.toString()) {
       return res.status(400).json({ message: 'Cannot request your own item' });
