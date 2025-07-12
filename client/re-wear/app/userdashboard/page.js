@@ -1,44 +1,74 @@
 'use client'
-import React, { useState } from 'react';
-
-const userInitial = {
-  name: 'Alex Johnson',
-  age: 28,
-  gender: 'Male',
-  email: 'alex.johnson@email.com',
-  phone: '+1 555-123-4567',
-  city: 'New York',
-  points: 320,
-  listings: [1, 2, 3, 4],
-  purchases: [1, 2, 3, 4],
-};
-
-const notificationsData = {
-  approved: ['Denim Jacket', 'Summer Dress'],
-  pending: ['Classic Tee', 'Sneakers'],
-  recent: ['Swap with Priya (Dress for Jacket)', 'Swap with John (Shoes for Tee)'],
-};
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../contexts/AuthContext';
+import api from '../../lib/api';
 
 const UserDashboardPage = () => {
-  const [user, setUser] = useState(userInitial);
+  const { user, logout, updateProfile } = useAuth();
+  const router = useRouter();
   const [showEdit, setShowEdit] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [userItems, setUserItems] = useState([]);
+  const [swapRequests, setSwapRequests] = useState([]);
   const [editForm, setEditForm] = useState({
-    name: user.name,
-    age: user.age,
-    email: user.email,
-    phone: user.phone,
-    city: user.city,
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    city: user?.city || '',
   });
+
+  useEffect(() => {
+    if (!user && !loading) {
+      router.push('/login');
+      return;
+    }
+    
+    if (user) {
+      fetchUserData();
+    }
+  }, [user, loading, router]);
+
+  const fetchUserData = async () => {
+    try {
+      const [itemsRes, requestsRes] = await Promise.all([
+        api.get('/api/items/my-items'),
+        api.get('/api/swap-requests/my-requests')
+      ]);
+      
+      setUserItems(itemsRes.data);
+      setSwapRequests(requestsRes.data);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
   const handleEditChange = (e) => {
     setEditForm({ ...editForm, [e.target.name]: e.target.value });
   };
 
-  const handleEditSave = () => {
-    setUser({ ...user, ...editForm });
-    setShowEdit(false);
+  const handleEditSave = async () => {
+    setLoading(true);
+    const result = await updateProfile(editForm);
+    if (result.success) {
+      setShowEdit(false);
+    }
+    setLoading(false);
   };
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-gray-100 flex items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-gray-100">
@@ -116,10 +146,9 @@ const UserDashboardPage = () => {
           </div>
         </div>
         <nav className="flex gap-6 text-lg font-semibold w-full md:w-auto justify-center md:justify-end">
-          <a href="#" className="hover:text-blue-400">Home</a>
-          <a href="#" className="hover:text-blue-400">Browse</a>
-          <a href="#" className="hover:text-blue-400">Login</a>
-          <a href="#" className="hover:text-blue-400">Sign Up</a>
+          <a href="/itemlisting" className="hover:text-blue-400">Browse</a>
+          <a href="/userdashboard" className="hover:text-blue-400">Dashboard</a>
+          <button onClick={handleLogout} className="hover:text-blue-400">Logout</button>
         </nav>
       </header>
 
@@ -128,14 +157,13 @@ const UserDashboardPage = () => {
         <div className="bg-gray-900 rounded-2xl p-6 md:p-8 flex flex-col lg:flex-row gap-8 border border-gray-800">
           {/* Profile Avatar & Info */}
           <div className="flex flex-col items-center lg:items-start gap-4 w-full lg:w-1/3">
-            <div className="w-32 h-32 rounded-full bg-white border-4 border-blue-900 flex items-center justify-center text-4xl font-bold text-blue-900 mb-2">{user.name[0]}</div>
+            <div className="w-32 h-32 rounded-full bg-white border-4 border-blue-900 flex items-center justify-center text-4xl font-bold text-blue-900 mb-2">{user?.name?.[0] || 'U'}</div>
             <div className="space-y-1 text-center lg:text-left">
-              <div className="text-xl font-bold text-white">{user.name}</div>
-              <div className="text-gray-400 text-sm">Age: {user.age}</div>
-              <div className="text-gray-400 text-sm">Gender: {user.gender}</div>
-              <div className="text-gray-400 text-sm">Email: {user.email}</div>
-              <div className="text-gray-400 text-sm">Phone: {user.phone}</div>
-              <div className="text-gray-400 text-sm">City: {user.city}</div>
+              <div className="text-xl font-bold text-white">{user?.name || 'User'}</div>
+              <div className="text-gray-400 text-sm">Email: {user?.email || 'N/A'}</div>
+              <div className="text-gray-400 text-sm">Phone: {user?.phone || 'N/A'}</div>
+              <div className="text-gray-400 text-sm">City: {user?.city || 'N/A'}</div>
+              <div className="text-gray-400 text-sm">Role: {user?.role || 'User'}</div>
             </div>
           </div>
           {/* Buttons & Points */}
@@ -148,7 +176,7 @@ const UserDashboardPage = () => {
               </button>
             </div>
             <div className="bg-white rounded-xl border border-blue-900 p-6 flex items-center justify-center text-3xl font-extrabold text-blue-900 min-h-[90px]">
-              Points: <span className="ml-3 text-4xl">{user.points}</span>
+              Points: <span className="ml-3 text-4xl">{user?.points || 0}</span>
             </div>
           </div>
         </div>
@@ -157,23 +185,39 @@ const UserDashboardPage = () => {
         <div className="mt-10">
           <h2 className="text-lg font-bold text-white mb-4">My Listings</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {user.listings.map((item, idx) => (
-              <div key={idx} className="bg-white rounded-xl border border-gray-200 h-40 flex items-center justify-center text-black">
-                Listing {idx + 1}
+            {userItems.length > 0 ? (
+              userItems.map((item, idx) => (
+                <div key={item._id || idx} className="bg-white rounded-xl border border-gray-200 h-40 flex flex-col items-center justify-center text-black p-4">
+                  <div className="font-semibold text-sm text-center">{item.title}</div>
+                  <div className="text-xs text-gray-600 mt-1">{item.category}</div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center text-gray-400 py-8">
+                No listings yet. <a href="/add-item" className="text-blue-400 hover:underline">Add your first item!</a>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
-        {/* My Purchases */}
+        {/* Swap Requests */}
         <div className="mt-10">
-          <h2 className="text-lg font-bold text-white mb-4">My Purchases</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {user.purchases.map((item, idx) => (
-              <div key={idx} className="bg-white rounded-xl border border-gray-200 h-40 flex items-center justify-center text-black">
-                Purchase {idx + 1}
+          <h2 className="text-lg font-bold text-white mb-4">My Swap Requests</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {swapRequests.length > 0 ? (
+              swapRequests.map((request, idx) => (
+                <div key={request._id || idx} className="bg-white rounded-xl border border-gray-200 p-4 text-black">
+                  <div className="font-semibold">{request.status}</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    {request.requestedItem?.title} ↔ {request.offeredItem?.title}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center text-gray-400 py-8">
+                No swap requests yet.
               </div>
-            ))}
+            )}
           </div>
         </div>
       </main>

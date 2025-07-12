@@ -57,8 +57,8 @@ const HeroSectionPage = () => {
           </div>
         </div>
         <nav className="flex gap-6 text-lg font-semibold w-full md:w-auto justify-center md:justify-end">
-          <a href="#" className="hover:text-blue-400">Home</a>
-          <a href="#" className="hover:text-blue-400">Browse</a>
+          <Link href="/" className="hover:text-blue-400">Home</Link>
+          <Link href="/itemlisting" className="hover:text-blue-400">Browse</Link>
           <Link href="/login" className="hover:text-blue-400">Login</Link>
           <Link href="/signup" className="hover:text-blue-400">Sign Up</Link>
         </nav>
@@ -69,8 +69,8 @@ const HeroSectionPage = () => {
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-4">Swap. Save. Sustain.</h1>
         <p className="text-lg sm:text-xl text-gray-300 mb-8 max-w-2xl">Join ReWear and start swapping clothes with the community. Refresh your wardrobe, reduce waste, and make a positive impact on the planet.</p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button className="bg-blue-900 text-white px-8 py-3 rounded-lg font-bold hover:bg-black border border-blue-900 transition text-lg">Start Swapping</button>
-          <button className="bg-white text-blue-900 px-8 py-3 rounded-lg font-bold border border-blue-900 hover:bg-gray-100 transition text-lg">Browse Items</button>
+          <Link href="/signup" className="bg-blue-900 text-white px-8 py-3 rounded-lg font-bold hover:bg-black border border-blue-900 transition text-lg text-center">Start Swapping</Link>
+          <Link href="/itemlisting" className="bg-white text-blue-900 px-8 py-3 rounded-lg font-bold border border-blue-900 hover:bg-gray-100 transition text-lg text-center">Browse Items</Link>
         </div>
       </section>
 

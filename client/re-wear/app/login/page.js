@@ -1,43 +1,47 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../contexts/AuthContext';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { login, user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    // Check if already logged in
-    fetch('http://localhost:5000/auth/me', {
-      credentials: 'include',
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          router.replace('/landingpage');
-        }
-      })
-      .catch(() => {});
-  }, [router]);
+    if (user && !authLoading) {
+      router.replace('/userdashboard');
+    }
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const res = await fetch('http://localhost:5000/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email, password })
-    });
-    if (res.ok) {
-      router.push('/landingpage');
+    setLoading(true);
+    
+    const result = await login(email, password);
+    
+    if (result.success) {
+      router.push('/userdashboard');
     } else {
-      const data = await res.json();
-      setError(data.message || 'Login failed');
+      setError(result.error);
     }
+    
+    setLoading(false);
   };
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black mt-20 mb-10">
@@ -103,24 +107,16 @@ const LoginPage = () => {
                 </div>
               </div>
               {error && <div className="text-red-600 text-sm font-semibold">{error}</div>}
-              <button type="submit" className="w-full py-3 bg-blue-900 text-white font-bold rounded-lg shadow-md hover:bg-black transition text-lg tracking-wide">Sign In</button>
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full py-3 bg-blue-900 text-white font-bold rounded-lg shadow-md hover:bg-black transition text-lg tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Signing In...' : 'Sign In'}
+              </button>
             </form>
-            <div className="flex items-center my-6">
-              <div className="flex-grow h-px bg-gray-200" />
-              <span className="mx-2 text-gray-400 text-sm">or</span>
-              <div className="flex-grow h-px bg-gray-200" />
-            </div>
-            <a href="http://localhost:5000/auth/google" className="w-full flex items-center justify-center py-3 border border-gray-300 rounded-lg bg-gray-100 hover:bg-gray-200 transition font-semibold text-gray-800 text-base mb-4">
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 48 48"><g><path d="M44.5 20H24v8.5h11.7C34.7 33.1 30.1 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.1 8.1 2.9l6.1-6.1C34.5 6.5 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.3-4z" fill="#FFC107"/><path d="M6.3 14.7l7 5.1C15.5 16.1 19.4 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.1-6.1C34.5 6.5 29.6 4 24 4c-7.2 0-13.3 4.1-16.7 10.7z" fill="#FF3D00"/><path d="M24 44c5.5 0 10.4-1.8 14.2-4.9l-6.6-5.4C29.7 35.5 27 36.5 24 36.5c-6.1 0-10.7-2.9-11.7-7.5l-7.1 5.5C7.7 39.9 15.3 44 24 44z" fill="#4CAF50"/><path d="M44.5 20H24v8.5h11.7c-1.1 3.1-4.1 5.5-7.7 5.5-4.6 0-8.3-3.7-8.3-8.3 0-.7.1-1.4.2-2.1l-7.1-5.5C7.3 22.1 6 25.9 6 30c0 7.1 5.8 13 13 13 7.2 0 13-5.8 13-13 0-1.3-.2-2.6-.5-3.8z" fill="#1976D2"/></g></svg>
-              Sign in with Google
-            </a>
-            <div className="flex items-center my-6">
-              <div className="flex-grow h-px bg-gray-200" />
-              <span className="mx-2 text-gray-400 text-sm">New to ReWear?</span>
-              <div className="flex-grow h-px bg-gray-200" />
-            </div>
             <div className="text-center">
-              <a href="#" className="text-blue-700 font-bold hover:underline text-base">Create your account</a>
+              <a href="/signup" className="text-blue-700 font-bold hover:underline text-base">Create your account</a>
             </div>
             <footer className="mt-10 text-center text-xs text-gray-400">
               © 2025 ReWear. All rights reserved.<br />

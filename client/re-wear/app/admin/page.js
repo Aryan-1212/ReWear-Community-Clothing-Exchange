@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Mock user data
 const users = [
@@ -29,31 +30,22 @@ const users = [
 
 const AdminPanel = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
+  const { user, loading } = useAuth();
+  const [pageLoading, setPageLoading] = useState(true);
 
   useEffect(() => {
-    // Auth check: only allow admin
-    fetch('http://localhost:5000/auth/me', { credentials: 'include' })
-      .then(async (res) => {
-        if (!res.ok) {
-          router.replace('/login');
-        } else {
-          const data = await res.json();
-          setUser(data);
-          if (data.role !== 'admin') {
-            router.replace('/landingpage');
-          } else {
-            setLoading(false);
-          }
-        }
-      })
-      .catch(() => {
+    if (!loading) {
+      if (!user) {
         router.replace('/login');
-      });
-  }, [router]);
+      } else if (user.role !== 'admin') {
+        router.replace('/userdashboard');
+      } else {
+        setPageLoading(false);
+      }
+    }
+  }, [user, loading, router]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-white">Loading...</div>;
+  if (loading || pageLoading) return <div className="min-h-screen flex items-center justify-center text-white">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center py-8 px-2">

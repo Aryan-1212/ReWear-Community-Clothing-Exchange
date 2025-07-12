@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../contexts/AuthContext';
 
 const categories = [
   'Men', 'Women', 'Kids', 'Accessories', 'Shoes', 'Bags'
@@ -10,33 +11,25 @@ const products = [1, 2, 3, 4];
 
 const LandingPage = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const { user, loading, logout } = useAuth();
+  const [pageLoading, setPageLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/auth/me', {
-      credentials: 'include',
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          router.replace('/login');
-        } else {
-          setLoading(false);
-        }
-      })
-      .catch(() => {
+    if (!loading) {
+      if (!user) {
         router.replace('/login');
-      });
-  }, [router]);
+      } else {
+        setPageLoading(false);
+      }
+    }
+  }, [user, loading, router]);
 
   const handleLogout = async () => {
-    await fetch('http://localhost:5000/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
-    });
+    await logout();
     router.push('/login');
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-white">Loading...</div>;
+  if (loading || pageLoading) return <div className="min-h-screen flex items-center justify-center text-white">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-black text-gray-100">
